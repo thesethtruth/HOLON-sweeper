@@ -1,0 +1,8 @@
+title: "Base"
+description: "Base scenario"
+scenario_id: 444001
+base_url: https://holon-v2-acceptatie.azurewebsites.net
+
+interactive_inputs:
+  base: null
+  sweep: null

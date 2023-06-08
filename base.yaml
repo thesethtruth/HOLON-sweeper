@@ -1,0 +1,48 @@
+title: "Base"
+description: "Base scenario"
+scenario_id: 444001
+base_url: https://holon-v2-acceptatie.azurewebsites.net
+
+interactive_inputs:
+  base:
+    clear_energy_assets:
+      id: 444025
+      value: "true"
+    add_thermal_models:
+      id: 444035
+      value: "true"
+    set_energy_systems:
+      id: 444037
+      value: "true"
+    # set_contracts:
+    #   id: !!
+    #   value: !!
+
+  sweep:
+    vary_insulation_values:
+      id: 440022
+      options: ["A of beter", "B", "C", "D", "E", "F", "G"]
+    vary_energy_systems:
+      id: 4440021
+      options:
+        [
+          "Hybride warmtepomp (individueel)",
+          "All-electric warmtepomp (individueel)",
+          "Warmtenet restwarmte (hoge temperatuur)",
+          "Warmtenet restwarmte (middentemperatuur)",
+        ]
+    vary_building_types:
+      id: 444020
+      options:
+        [
+          "Vrijstaand",
+          "Twee-onder-een-kap",
+          "Rijwoning",
+          "Appartement",
+          "Galerijwoning",
+        ]
+    vary_base_electrification:
+      id: 444024
+      lower_bound: 10
+      upper_bound: 80
+      step: 100
