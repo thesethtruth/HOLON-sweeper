@@ -33,7 +33,9 @@ class Experiment(BaseModel):
             url=self.base_url + ENDPOINT,
             json={"interactive_elements": [], "scenario": self.scenario_id},
         )
-
+        ## add sentry logging
+        ## add caching = False (as cookie)
+        
         return response
 
 e = Experiment.load_from_yaml("../empty.yaml")
