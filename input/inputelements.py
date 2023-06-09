@@ -4,7 +4,12 @@ from typing import Union, Dict, List
 
 class InteractiveElement(BaseModel):
     id: int
-
+    
+    def to_json(self):
+        return {
+            "interactive_element": self.id,
+            "value": self.value,
+        }
 
 class ContinousInteractiveElement(InteractiveElement):
     value: Union[int, float]
