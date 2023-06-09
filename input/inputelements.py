@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, PrivateAttr
 from typing import Union, Dict, List
 
 
@@ -16,12 +16,33 @@ class DiscreteInteractiveElement(InteractiveElement):
 
 class DiscreteInteractiveElementSweep(InteractiveElement):
     options: List[str]
+    _current: Union[int, float] = PrivateAttr()
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self._current = 0
+
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        if self._current == len(self.options):
+            raise StopIteration
+        else:
+            result = self.options[self._current]
+            self._current += 1
+            return DiscreteInteractiveElement(id=self.id, value=result)
 
 
 class ContinousInteractiveElementSweep(InteractiveElement):
     lower_bound: Union[int, float]
     upper_bound: Union[int, float]
     step: Union[int, float]
+    _current: Union[int, float] = PrivateAttr()
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self._current = self.lower_bound
 
     @validator("step")
     def step_must_fit_range(cls, v, values):
@@ -32,6 +53,16 @@ class ContinousInteractiveElementSweep(InteractiveElement):
             )
         return v
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._current > self.upper_bound:
+            raise StopIteration
+        else:
+            result = self._current
+            self._current += self.step
+            return ContinousInteractiveElement(id=self.id, value=result)
 
 class InteractiveInputs(BaseModel):
     base: Union[

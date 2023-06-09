@@ -45,4 +45,4 @@ interactive_inputs:
       id: 444024
       lower_bound: 10
       upper_bound: 80
-      step: 100
+      step: 10

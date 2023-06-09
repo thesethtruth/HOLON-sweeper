@@ -1,5 +1,5 @@
-title: "Base"
-description: "Base scenario"
+title: "Empty"
+description: "Base secnario without any interactive inputs"
 scenario_id: 444001
 base_url: https://holon-v2-acceptatie.azurewebsites.net
 

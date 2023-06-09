@@ -4,7 +4,9 @@ from inputelements import (
 )
 import inspect
 from pathlib import Path
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, PrivateAttr
+from itertools import product
+from typing import Iterable
 
 import requests as r
 
@@ -17,6 +19,11 @@ class Experiment(BaseModel):
     description: str
     interactive_inputs: InteractiveInputs
     base_url: HttpUrl
+    _sweep_set: Iterable = PrivateAttr()
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self._sweep_set = None
 
     @classmethod
     def load_from_yaml(self, relative_file_path: str = "experiment.yaml"):
@@ -26,19 +33,44 @@ class Experiment(BaseModel):
             experiment = yaml.safe_load(f)
         return Experiment(**experiment)
 
-    def run(self):
+    def post(self):
         print(f"Running experiment {self.title}")
+
+        # cookies = {"caching": False} # correct?
+        # params = {"sentry_logging": True} # correct?
 
         response = r.post(
             url=self.base_url + ENDPOINT,
-            json={"interactive_elements": [], "scenario": self.scenario_id},
+            json={
+                "interactive_elements": [
+                    *[
+                        {"interactive_element": ie.id, "value": ie.value}
+                        for ie in self.interactive_inputs.base
+                    ],
+                    *self.current_sweep
+                ],
+                "scenario": 1,
+            },
+            # cookies=cookies,
+            # params=params,
         )
-        ## add sentry logging
-        ## add caching = False (as cookie)
-        
+
         return response
+    
+    @property
+    def current_sweep(self):
+        if self.interactive_inputs.sweep is None:
+            return None
+        else:
+            return next(self.sweep_set)
+    
+    @property
+    def sweep_set(self):
+        if self._sweep_set is None:
+            self._sweep_set = product(
+                *self.interactive_inputs.sweep.values()
+            )
+        return self._sweep_set
 
-e = Experiment.load_from_yaml("../empty.yaml")
 
-
-res = e.run()
+e = Experiment.load_from_yaml("../base.yaml")
