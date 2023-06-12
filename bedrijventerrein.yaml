@@ -1,0 +1,13 @@
+title: "Bedrijventerrein - sweep on electric trucks"
+description: "Bedrijventerrein secnario  any interactive inputs"
+scenario_id: 1
+base_url: https://holon-v2-acceptatie.azurewebsites.net
+
+interactive_inputs:
+  base: null
+  sweep: 
+    vary_truck_electrification:
+      id: 3
+      lower_bound: 20
+      upper_bound: 80
+      step: 10

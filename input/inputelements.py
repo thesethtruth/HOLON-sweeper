@@ -3,23 +3,32 @@ from typing import Union, Dict, List
 
 
 class InteractiveElement(BaseModel):
+    """Base class for interactive elements input elements"""
+
     id: int
-    
+
     def to_json(self):
         return {
             "interactive_element": self.id,
             "value": self.value,
         }
 
+
 class ContinousInteractiveElement(InteractiveElement):
+    """Class to represent a continous interactive element"""
+
     value: Union[int, float]
 
 
 class DiscreteInteractiveElement(InteractiveElement):
+    """Class to represent a discrete interactive element"""
+
     value: str
 
 
 class DiscreteInteractiveElementSweep(InteractiveElement):
+    """Class to represent a discrete interactive element sweep, yields single interactive elements on iteration"""
+
     options: List[str]
     _current: Union[int, float] = PrivateAttr()
 
@@ -29,7 +38,7 @@ class DiscreteInteractiveElementSweep(InteractiveElement):
 
     def __iter__(self):
         return self
-    
+
     def __next__(self):
         if self._current == len(self.options):
             raise StopIteration
@@ -40,6 +49,8 @@ class DiscreteInteractiveElementSweep(InteractiveElement):
 
 
 class ContinousInteractiveElementSweep(InteractiveElement):
+    """Class to represent a continous interactive element sweep, yields single interactive elements on iteration"""
+
     lower_bound: Union[int, float]
     upper_bound: Union[int, float]
     step: Union[int, float]
@@ -69,7 +80,10 @@ class ContinousInteractiveElementSweep(InteractiveElement):
             self._current += self.step
             return ContinousInteractiveElement(id=self.id, value=result)
 
+
 class InteractiveInputs(BaseModel):
+    """Class to contain sets of interactive elements"""
+
     base: Union[
         Dict[str, Union[ContinousInteractiveElement, DiscreteInteractiveElement]], None
     ]
