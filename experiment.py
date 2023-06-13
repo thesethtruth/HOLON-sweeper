@@ -75,7 +75,7 @@ class Experiment:
     def inputs(self):
         """Return inputs as a pandas dataframe"""
         return pd.concat(self._inputs)
-    
+
     @property
     def cost_benifit(self):
         """Return cost benifit as a pandas dataframe"""
@@ -93,7 +93,7 @@ class Experiment:
     def interactive_to_df(self, interactive_inputs: List[Dict[str, Any]], uuid: str):
         df = pd.DataFrame(columns=["uuid", "id", "value"])
         for ie in interactive_inputs:
-            df.loc[len(df)] = [uuid, ie['interactive_element'], ie['value']]
+            df.loc[len(df)] = [uuid, ie["interactive_element"], ie["value"]]
         return df
 
     def post(self):
@@ -125,11 +125,15 @@ class Experiment:
         )
 
         return response, interactive_elements
-    
-    def store_results(self, result: Union[HOLONResponse, HOLONErrorReponse], interactive_elements: List[Dict[str, Any]]):
+
+    def store_results(
+        self,
+        result: Union[HOLONResponse, HOLONErrorReponse],
+        interactive_elements: List[Dict[str, Any]],
+    ):
         """Store the results of a single point"""
         uuid = str(uuid4())
-        
+
         if isinstance(result, HOLONResponse):
             self._results.append(result.dashboard_results.to_pandas(uuid))
             self._inputs.append(self.interactive_to_df(interactive_elements, uuid))
@@ -142,16 +146,17 @@ class Experiment:
 
     def initiate_experiment(self):
         """creates a folder for the experiment and subfolders for anylogic and scenario files"""
-        
+
         timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
 
-        self.experiment_folder = self.config_path.parent / "experiments" / f"{self.title}" / f"{timestamp}"
+        self.experiment_folder = (
+            self.config_path.parent / "experiment_outputs" / f"{self.title}" / f"{timestamp}"
+        )
         self.scenario_folder = self.experiment_folder / "scenario"
         self.anylogic_folder = self.experiment_folder / "anylogic"
         self.experiment_folder.mkdir(parents=True, exist_ok=True)
         self.scenario_folder.mkdir(parents=True, exist_ok=True)
         self.anylogic_folder.mkdir(parents=True, exist_ok=True)
-        
 
     def run_point(self):
         """Run a single point of the experiment, i.e. a single set of inputs"""
@@ -177,5 +182,3 @@ class Experiment:
                 self.run_point()
         except StopIteration:
             print("Finished experiment")
-
-
