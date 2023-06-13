@@ -20,17 +20,21 @@ class ResultLoader:
 
         return " - ".join([day, time])
 
-    def list_experiment_verions(self, experiment_path: Path):
-        return [entry.name for entry in experiment_path.glob("*") if entry.is_dir()]
+    def list_experiment_verions(self, experiment: str):
+        return [
+            entry.name for entry in (self.path / experiment).glob("*") if entry.is_dir()
+        ]
 
-    def list_experiment_versions_nicely(self, experiment_path: Path):
+    def list_experiment_versions_nicely(self, experiment: str):
         return [
             self.nice_experiment_version(entry.name)
-            for entry in experiment_path.glob("*")
+            for entry in (self.path / experiment).glob("*")
             if entry.is_dir()
         ]
 
-    def load_experiment_version_run(self, experiment_version_path: Path):
+    def load_experiment_version_run(self, experiment: str, experiment_version: str):
+        experiment_version_path = self.path / experiment / experiment_version
+
         inputs = pd.read_csv(
             experiment_version_path / "inputs.csv", index_col=0, header=0
         )
@@ -42,4 +46,15 @@ class ResultLoader:
         )
 
         return inputs, results, cost_benefit
+
+
+if __name__ == "__main__":
+    rl = ResultLoader()
+    experiment = rl.list_experiments()[0]
+    experiment_version = rl.list_experiment_verions(experiment)[0]
+
+    _, results, _ = rl.load_experiment_version_run(experiment, experiment_version)
+
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
 

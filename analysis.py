@@ -1,6 +1,13 @@
 import streamlit as st
 from results.importer import ResultLoader
 import numpy as np
+from pathlib import Path
+import yaml
+
+
+with open(Path(__file__).parent / "analysis_config.yaml", "r") as f:
+    config = yaml.safe_load(f)
+    slider_names = config["slider_names"]
 
 
 st.title("HOLON sweeper analysis tool")
@@ -19,7 +26,7 @@ experiments = rl.list_experiments()
 
 experiment = st.selectbox(label="Experiment", options=experiments)
 
-experiment_versions = rl.list_experiment_verions(rl.path / experiment)
+experiment_versions = rl.list_experiment_verions(experiment)
 
 experiment_version = st.selectbox(
     label="Experiment version",
@@ -28,10 +35,32 @@ experiment_version = st.selectbox(
 )
 
 inputs, results, cost_benefit = rl.load_experiment_version_run(
-    rl.path / experiment / experiment_version
+    experiment=experiment, experiment_version=experiment_version
 )
 
-st.subheader("Select input parameters")
+# with st.expander("Statistics - experiment overview"):
+#     st.write(
+#         f"""
+#         Total experiments:              {}
+#         """
+#     )
+
+# with st.expander("Statistics - inputs"):
+#     st.write(
+#         """
+#         This tool allows you to explore the results of the HOLON sweeper.
+#         """
+#     )
+
+# with st.expander("Statistics - results"):
+#     st.write(
+#         """
+#         This tool allows you to explore the results of the HOLON sweeper.
+#         """
+#     )
+
+
+
 
 
 st.subheader("Select output parameters")
@@ -42,17 +71,12 @@ level = st.selectbox(
     format_func=lambda x: x.capitalize(),
 )
 
+from results.plotting import plot_kpi
 
-for kpi, color in ["sustainability", "self_sufficiency", "netload", "costs"]:
-    this_set = (
-        results.query("level == @level & kpi == @kpi")
-        .drop(["level", "kpi", "uuid"], axis=1)
-        .rename(columns={"value": kpi})
-        .reset_index(drop=True)
-    )
+fig = plot_kpi(results, level)
 
+st.plotly_chart(fig, use_container_width=True)
 
-    st.line_chart(this_set, height=300, use_container_width=True, )
 
 
 # def dataframe_with_selections(df):
