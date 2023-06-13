@@ -37,7 +37,7 @@ class Experiment:
 
         self._results = []
         self._inputs = []
-        self._cost_benifit = []
+        self._cost_benefit = []
         self._sweep_set: Iterable = None
         self._single_sweep: bool = False
 
@@ -77,9 +77,9 @@ class Experiment:
         return pd.concat(self._inputs)
 
     @property
-    def cost_benifit(self):
+    def cost_benefit(self):
         """Return cost benifit as a pandas dataframe"""
-        return pd.concat(self._cost_benifit)
+        return pd.concat(self._cost_benefit)
 
     @classmethod
     def load_from_yaml(self, relative_file_path: str = "experiment.yaml"):
@@ -137,7 +137,7 @@ class Experiment:
         if isinstance(result, HOLONResponse):
             self._results.append(result.dashboard_results.to_pandas(uuid))
             self._inputs.append(self.interactive_to_df(interactive_elements, uuid))
-            self._cost_benifit.append(result.cost_benifit.to_pandas(uuid))
+            self._cost_benefit.append(result.cost_benefit.to_pandas(uuid))
             result.write_scenario(self.scenario_folder, uuid)
 
         else:
@@ -165,10 +165,16 @@ class Experiment:
 
         if response.status_code == 200:
             result = HOLONResponse(**response.json())
-            self._results.append(result.dashboard_results.to_pandas(uuid))
-            self._inputs.append(self.interactive_to_df(interactive_elements, uuid))
         else:
             result = HOLONErrorReponse(**response.json())
+
+        self.store_results(result, interactive_elements)
+
+    def write_results_to_csv(self):
+        """Write the results to csv files"""
+        self.results.to_csv(self.experiment_folder / "results.csv")
+        self.inputs.to_csv(self.experiment_folder / "inputs.csv")
+        self.cost_benefit.to_csv(self.experiment_folder / "cost_benefit.csv")
 
     def run(self, disable_caching: bool = True, enable_sentry_logging: bool = True):
         """Run the experiment, i.e. all points"""
