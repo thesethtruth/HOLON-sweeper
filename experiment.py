@@ -37,6 +37,7 @@ class Experiment:
 
         self._results = []
         self._inputs = []
+        self._cost_benifit = []
         self._sweep_set: Iterable = None
         self._single_sweep: bool = False
 
@@ -74,13 +75,18 @@ class Experiment:
     def inputs(self):
         """Return inputs as a pandas dataframe"""
         return pd.concat(self._inputs)
+    
+    @property
+    def cost_benifit(self):
+        """Return cost benifit as a pandas dataframe"""
+        return pd.concat(self._cost_benifit)
 
     @classmethod
     def load_from_yaml(self, relative_file_path: str = "experiment.yaml"):
         """Load an experiment from a yaml file"""
         # resolve filepath using pathlib as relative import to call location
-        fp = Path(inspect.stack()[1].filename).parent / relative_file_path
-        with open(fp, "r") as f:
+        self.config_path = Path(inspect.stack()[1].filename).parent / relative_file_path
+        with open(self.config_path, "r") as f:
             experiment = yaml.safe_load(f)
         return Experiment(**experiment)
 
@@ -119,10 +125,36 @@ class Experiment:
         )
 
         return response, interactive_elements
+    
+    def store_results(self, result: Union[HOLONResponse, HOLONErrorReponse], interactive_elements: List[Dict[str, Any]]):
+        """Store the results of a single point"""
+        uuid = str(uuid4())
+        
+        if isinstance(result, HOLONResponse):
+            self._results.append(result.dashboard_results.to_pandas(uuid))
+            self._inputs.append(self.interactive_to_df(interactive_elements, uuid))
+            self._cost_benifit.append(result.cost_benifit.to_pandas(uuid))
+            result.write_scenario(self.scenario_folder, uuid)
+
+        else:
+            result.write_scenario(self.scenario_folder, uuid)
+            result.write_anylogic(self.anylogic_folder, uuid)
+
+    def initiate_experiment(self):
+        """creates a folder for the experiment and subfolders for anylogic and scenario files"""
+        
+        timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+
+        self.experiment_folder = self.config_path.parent / "experiments" / f"{self.title}" / f"{timestamp}"
+        self.scenario_folder = self.experiment_folder / "scenario"
+        self.anylogic_folder = self.experiment_folder / "anylogic"
+        self.experiment_folder.mkdir(parents=True, exist_ok=True)
+        self.scenario_folder.mkdir(parents=True, exist_ok=True)
+        self.anylogic_folder.mkdir(parents=True, exist_ok=True)
+        
 
     def run_point(self):
         """Run a single point of the experiment, i.e. a single set of inputs"""
-        uuid = str(uuid4())
 
         response, interactive_elements = self.post()
 
@@ -131,7 +163,6 @@ class Experiment:
             self._results.append(result.dashboard_results.to_pandas(uuid))
             self._inputs.append(self.interactive_to_df(interactive_elements, uuid))
         else:
-            print(response.json())
             result = HOLONErrorReponse(**response.json())
 
     def run(self, disable_caching: bool = True, enable_sentry_logging: bool = True):
@@ -139,6 +170,7 @@ class Experiment:
         self.disable_cache = disable_caching
         self.enable_sentry_logging = enable_sentry_logging
         print(f"Starting experiment {self.title}")
+        self.initiate_experiment()
         try:
             while True:
                 print("Running point")

@@ -1,0 +1,8 @@
+- [ ] Also log error responses
+- [ ] Save the input datamodel
+- [ ] Save kosten/baten response
+- [ ] Make a plotting thingy
+- [ ] Make a data exporting thingy
+- [ ] Make folder structures
+- [ ] Make a stochastic sampling option
+- [ ] Parallel processing
