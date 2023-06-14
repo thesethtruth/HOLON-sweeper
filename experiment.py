@@ -38,6 +38,7 @@ class Experiment:
         self._results = []
         self._inputs = []
         self._cost_benefit = []
+        self._errors = {}
         self._sweep_set: Iterable = None
         self._single_sweep: bool = False
 
@@ -134,15 +135,18 @@ class Experiment:
         """Store the results of a single point"""
         uuid = str(uuid4())
 
-        if isinstance(result, HOLONResponse):
-            self._results.append(result.dashboard_results.to_pandas(uuid))
-            self._inputs.append(self.interactive_to_df(interactive_elements, uuid))
-            self._cost_benefit.append(result.cost_benefit.to_pandas(uuid))
-            result.write_scenario(self.scenario_folder, uuid)
+        # Both cases have inputs and an scenario file
+        result.write_scenario(self.scenario_folder, uuid)
+        self._inputs.append(self.interactive_to_df(interactive_elements, uuid))
 
+        if isinstance(result, HOLONResponse):
+            # only if the result is a success do we have dashboard and cost benefit results
+            self._results.append(result.dashboard_results.to_pandas(uuid))
+            self._cost_benefit.append(result.cost_benefit_results.to_pandas(uuid))
         else:
-            result.write_scenario(self.scenario_folder, uuid)
+            # if error, error message & anylogic response JSON
             result.write_anylogic(self.anylogic_folder, uuid)
+            self._errors.update({uuid: result.error_msg})
 
     def initiate_experiment(self):
         """creates a folder for the experiment and subfolders for anylogic and scenario files"""

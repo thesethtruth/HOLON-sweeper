@@ -4,7 +4,6 @@ import numpy as np
 from pathlib import Path
 import yaml
 
-
 with open(Path(__file__).parent / "analysis_config.yaml", "r") as f:
     config = yaml.safe_load(f)
     slider_names = config["slider_names"]
@@ -12,7 +11,7 @@ with open(Path(__file__).parent / "analysis_config.yaml", "r") as f:
 
 st.title("HOLON sweeper analysis tool")
 
-st.subheader("Load experiment")
+st.subheader("Experiment to load")
 
 experiment_folder = st.text_input(label="Experiment folder", value="experiment_outputs")
 
@@ -60,10 +59,7 @@ inputs, results, cost_benefit = rl.load_experiment_version_run(
 #     )
 
 
-
-
-
-st.subheader("Select output parameters")
+st.subheader("Experiment outcomes")
 
 level = st.selectbox(
     "Select the level of interest",
@@ -71,12 +67,51 @@ level = st.selectbox(
     format_func=lambda x: x.capitalize(),
 )
 
+sort_by = st.selectbox(
+    "Sort by (ascending)",
+    options=results.kpi.unique(),
+    format_func=lambda x: x.replace("_", " ").capitalize(),
+)
+
 from results.plotting import plot_kpi
 
-fig = plot_kpi(results, level)
+fig = plot_kpi(results, level, sort_by=sort_by)
 
-st.plotly_chart(fig, use_container_width=True)
+from streamlit_plotly_events import plotly_events
 
+selected_point = plotly_events(fig, "click")
+
+if selected_point:
+    uuid = selected_point[0]["x"]
+
+    st.subheader(f"Selected UUID: {uuid}")
+
+    selected_inputs = inputs.query("uuid == @uuid").drop("uuid", axis=1)
+    selected_inputs["slider_name"] = selected_inputs["id"].map(slider_names)
+    selected_inputs = selected_inputs.set_index("slider_name")
+
+    st.dataframe(selected_inputs)
+
+    st.subheader("Cost benefit analysis")
+
+    with st.expander("Cost benefit - overview"):
+        st.dataframe(rl.cost_benefit_overview(cost_benefit, uuid))
+
+    with st.expander("Cost benefit - detail"):
+        options = rl.cost_benefit_detail_options(cost_benefit, uuid)
+        detail = st.selectbox("Select subgroup", options)
+
+        st.dataframe(rl.cost_benefit_detail(cost_benefit, uuid, detail))
+
+    st.subheader("Source files")
+
+    # button to download file
+    st.download_button(
+        label="Download scenario input file",
+        data=rl.get_scenario_file(experiment, experiment_version, uuid),
+        file_name="scenario.json",
+        mime="json",
+    )
 
 
 # def dataframe_with_selections(df):

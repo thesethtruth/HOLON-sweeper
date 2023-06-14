@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import json
 
 
 class ResultLoader:
@@ -47,14 +48,46 @@ class ResultLoader:
 
         return inputs, results, cost_benefit
 
+    def get_scenario_file(self, experiment: str, experiment_version: str, uuid: str):
+        experiment_version_path = self.path / experiment / experiment_version
+
+        with open(experiment_version_path / "scenarios" / f"{uuid}.json", "r") as f:
+            scenario = f.read()
+
+        return scenario
+    
+    @staticmethod
+    def cost_benefit_overview(cost_benefit: pd.DataFrame, uuid: str):
+        cost_benefit_overview = cost_benefit.set_index("uuid").at[uuid, "overview"]
+        cost_benefit_overview = json.loads(cost_benefit_overview.replace("'", '"'))
+        cost_benefit_overview = pd.DataFrame(cost_benefit_overview)
+        return cost_benefit_overview
+
+    @staticmethod
+    def cost_benefit_detail(
+        cost_benefit: pd.DataFrame, uuid: str, selected_detail: str
+    ):
+        cost_benefit_detail = cost_benefit.set_index("uuid").at[uuid, "detail"]
+        cost_benefit_detail = json.loads(cost_benefit_detail.replace("'", '"'))
+        cost_benefit_detail = cost_benefit_detail[selected_detail]
+        cost_benefit_detail = pd.DataFrame(cost_benefit_detail)
+        return cost_benefit_detail
+
+    @staticmethod
+    def cost_benefit_detail_options(cost_benefit: pd.DataFrame, uuid: str):
+        cost_benefit_detail = cost_benefit.set_index("uuid").at[uuid, "detail"]
+        cost_benefit_detail = json.loads(cost_benefit_detail.replace("'", '"'))
+        return cost_benefit_detail.keys()
+
 
 if __name__ == "__main__":
     rl = ResultLoader()
     experiment = rl.list_experiments()[0]
     experiment_version = rl.list_experiment_verions(experiment)[0]
 
-    _, results, _ = rl.load_experiment_version_run(experiment, experiment_version)
+    inputs, results, cost_benefit = rl.load_experiment_version_run(
+        experiment, experiment_version
+    )
 
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
-
