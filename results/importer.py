@@ -36,17 +36,14 @@ class ResultLoader:
     def load_experiment_version_run(self, experiment: str, experiment_version: str):
         experiment_version_path = self.path / experiment / experiment_version
 
-        inputs = pd.read_csv(
-            experiment_version_path / "inputs.csv", index_col=0, header=0
+        inputs = self.load_pd_or_empty(experiment_version_path / "inputs.csv")
+        results = self.load_pd_or_empty(experiment_version_path / "results.csv")
+        cost_benefit = self.load_pd_or_empty(
+            experiment_version_path / "cost_benefit.csv"
         )
-        results = pd.read_csv(
-            experiment_version_path / "results.csv", index_col=0, header=0
-        )
-        cost_benefit = pd.read_csv(
-            experiment_version_path / "cost_benefit.csv", index_col=0, header=0
-        )
+        errors = self.load_pd_or_empty(experiment_version_path / "errors.csv")
 
-        return inputs, results, cost_benefit
+        return inputs, results, cost_benefit, errors
 
     def get_scenario_file(self, experiment: str, experiment_version: str, uuid: str):
         experiment_version_path = self.path / experiment / experiment_version
@@ -55,7 +52,7 @@ class ResultLoader:
             scenario = f.read()
 
         return scenario
-    
+
     @staticmethod
     def cost_benefit_overview(cost_benefit: pd.DataFrame, uuid: str):
         cost_benefit_overview = cost_benefit.set_index("uuid").at[uuid, "overview"]
@@ -79,13 +76,20 @@ class ResultLoader:
         cost_benefit_detail = json.loads(cost_benefit_detail.replace("'", '"'))
         return cost_benefit_detail.keys()
 
+    @staticmethod
+    def load_pd_or_empty(path: Path):
+        try:
+            return pd.read_csv(path, index_col=0, header=0)
+        except FileNotFoundError:
+            return pd.DataFrame()
+
 
 if __name__ == "__main__":
     rl = ResultLoader()
     experiment = rl.list_experiments()[0]
     experiment_version = rl.list_experiment_verions(experiment)[0]
 
-    inputs, results, cost_benefit = rl.load_experiment_version_run(
+    inputs, results, cost_benefit, errors = rl.load_experiment_version_run(
         experiment, experiment_version
     )
 

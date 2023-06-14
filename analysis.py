@@ -33,31 +33,21 @@ experiment_version = st.selectbox(
     format_func=rl.nice_experiment_version,
 )
 
-inputs, results, cost_benefit = rl.load_experiment_version_run(
+inputs, results, cost_benefit, errors = rl.load_experiment_version_run(
     experiment=experiment, experiment_version=experiment_version
 )
 
-# with st.expander("Statistics - experiment overview"):
-#     st.write(
-#         f"""
-#         Total experiments:              {}
-#         """
-#     )
+with st.expander("Statistics - experiment overview"):
+    st.write(
+        f"""
+        Total experiments: \t{results.uuid.unique().shape[0]} \n
+        Total errors: \t\t{errors.shape[0]}
+        """
+    )
 
-# with st.expander("Statistics - inputs"):
-#     st.write(
-#         """
-#         This tool allows you to explore the results of the HOLON sweeper.
-#         """
-#     )
-
-# with st.expander("Statistics - results"):
-#     st.write(
-#         """
-#         This tool allows you to explore the results of the HOLON sweeper.
-#         """
-#     )
-
+# TODO
+# Statistics of inputs
+# Statistics of results
 
 st.subheader("Experiment outcomes")
 

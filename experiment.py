@@ -82,6 +82,11 @@ class Experiment:
         """Return cost benifit as a pandas dataframe"""
         return pd.concat(self._cost_benefit)
 
+    @property
+    def errors(self):
+        """Return errors as a pandas dataframe"""
+        return pd.DataFrame.from_dict(self._errors, orient="index", columns=["error_msg"])
+
     @classmethod
     def load_from_yaml(self, relative_file_path: str = "experiment.yaml"):
         """Load an experiment from a yaml file"""
@@ -179,6 +184,7 @@ class Experiment:
         self.results.to_csv(self.experiment_folder / "results.csv")
         self.inputs.to_csv(self.experiment_folder / "inputs.csv")
         self.cost_benefit.to_csv(self.experiment_folder / "cost_benefit.csv")
+        self.errors.to_csv(self.experiment_folder / "errors.csv")
 
     def run(self, disable_caching: bool = True, enable_sentry_logging: bool = True):
         """Run the experiment, i.e. all points"""
@@ -192,3 +198,5 @@ class Experiment:
                 self.run_point()
         except StopIteration:
             print("Finished experiment")
+
+        self.write_results_to_csv()
