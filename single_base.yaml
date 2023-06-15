@@ -1,0 +1,11 @@
+title: "Bedrijventerrein - single base"
+description: "Bedrijventerrein scenario with only base inputs"
+scenario_id: 1
+base_url: https://holon-v2-acceptatie.azurewebsites.net
+
+interactive_inputs:
+  base: 
+    truck_electrification:
+      id: 3
+      value: 50
+  sweep: null

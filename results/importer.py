@@ -48,7 +48,7 @@ class ResultLoader:
     def get_scenario_file(self, experiment: str, experiment_version: str, uuid: str):
         experiment_version_path = self.path / experiment / experiment_version
 
-        with open(experiment_version_path / "scenarios" / f"{uuid}.json", "r") as f:
+        with open(experiment_version_path / "scenario" / f"{uuid}.json", "r") as f:
             scenario = f.read()
 
         return scenario

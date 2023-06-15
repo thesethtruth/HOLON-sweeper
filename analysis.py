@@ -37,13 +37,13 @@ inputs, results, cost_benefit, errors = rl.load_experiment_version_run(
     experiment=experiment, experiment_version=experiment_version
 )
 
-with st.expander("Statistics - experiment overview"):
-    st.write(
-        f"""
-        Total experiments: \t{results.uuid.unique().shape[0]} \n
-        Total errors: \t\t{errors.shape[0]}
-        """
-    )
+st.success(
+    f"""
+    #### Statistics - experiment overview
+    Total experiments:    **{results.uuid.unique().shape[0]}** \n
+    Total errors:         **{errors.shape[0]}**
+    """
+)
 
 # TODO
 # Statistics of inputs

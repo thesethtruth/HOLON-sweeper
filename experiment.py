@@ -58,7 +58,7 @@ class Experiment:
         """Return the base set as a list of dicts"""
         if self.interactive_inputs.base is None:
             return []
-        return [ie.to_json() for ie in self.interactive_inputs.base.values]
+        return [ie.to_json() for ie in self.interactive_inputs.base.values()]
 
     @property
     def sweep_set(self):
