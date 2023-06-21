@@ -124,7 +124,7 @@ class Experiment:
             url=self.base_url + ENDPOINT,
             json={
                 "interactive_elements": interactive_elements,
-                "scenario": 1,
+                "scenario": self.scenario_id,
             },
             cookies=cookies,
             params=params,
