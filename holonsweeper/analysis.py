@@ -1,6 +1,5 @@
 import streamlit as st
 from results.importer import ResultLoader
-import numpy as np
 from pathlib import Path
 import yaml
 

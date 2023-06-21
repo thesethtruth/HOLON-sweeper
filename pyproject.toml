@@ -1,19 +1,19 @@
 [tool.poetry]
-name = "holon-sweeper"
-version = "0.1.0"
-description = "This is a repo that contains only a tiny utility script to run various scenarios on holontool.nl. Allows you to quickly assess results and tweak your model or settings to achieve your dreams!"
 authors = ["thesethtruth <seth.van.wieringen@witteveenbos.com>"]
+description = "This is a repo that contains only a tiny utility script to run various scenarios on holontool.nl. Allows you to quickly assess results and tweak your model or settings to achieve your dreams!"
 license = "MIT"
+name = "holon-sweeper"
+packages = [{include = "holonsweeper"}]
 readme = "README.md"
-packages = [{include = "holon_sweeper"}]
+version = "0.1.0"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.9.7 || >3.9.7"
-requests = "^2.31.0"
 pandas = "^2.0.2"
 plotly = "^5.14.1"
 pydantic = "^1.10.9"
+python = ">=3.8,<3.9.7 || >3.9.7"
 pyyaml = "^6.0"
+requests = "^2.31.0"
 streamlit = "^1.23.1"
 streamlit-plotly-events = "^0.0.6"
 
@@ -22,5 +22,5 @@ ipykernel = "^6.23.1"
 nbformat = "^5.9.0"
 
 [build-system]
-requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]

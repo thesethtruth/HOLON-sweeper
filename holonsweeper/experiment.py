@@ -1,6 +1,6 @@
 import yaml
-from input.inputelements import InteractiveInputs
-from results.response import HOLONErrorReponse, HOLONResponse
+from .inputs.inputelements import InteractiveInputs
+from .results.response import HOLONErrorReponse, HOLONResponse
 import inspect
 from pathlib import Path
 from itertools import product
